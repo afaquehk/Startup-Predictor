@@ -1,4 +1,4 @@
-# v0 sandbox internal files
+# Local tool and generated files
 __v0_runtime_loader.js
 __v0_devtools.tsx
 __v0_jsx-dev-runtime.ts
@@ -7,18 +7,17 @@ __v0_jsx-dev-runtime.ts
 .vercel/
 next.user-config.*
 
-# Environment variables
 .env*.local
 .env
 !.env.example
 !.env.local.example
 
-# Common ignores
 node_modules
 .next/
+out/
+*.tsbuildinfo
 .DS_Store
 
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -31,29 +30,21 @@ backend/.venv/
 dist/
 build/
 
-# Backend specific
 backend/.env
-backend/dataset/*.csv
 backend/models/*.pkl
 
-# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
 Thumbs.db
 
-# Logs
 *.log
 logs/
 
-# Testing
 /coverage
-*.tsbuildinfo
-
-# Production
-/out/
-/build
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/

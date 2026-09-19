@@ -1,369 +1,233 @@
-# 🛰️ RiskRadar v2 - Startup Risk Intelligence Platform
+# RiskRadar
 
-> **Know your risk before the market does.**
+RiskRadar is a full-stack application for exploring startup data and assessing business risk. It provides a Next.js dashboard, a FastAPI backend, startup lookup, external data enrichment, risk scoring, and comparison tools.
 
-RiskRadar is a production-grade, full-stack AI platform that delivers real-time, explainable risk profiles for any startup — whether it's in our dataset of 5,000+ companies or pulled live from the web.
+## Features
 
-![RiskRadar Banner](https://img.shields.io/badge/RiskRadar-v2.0.0-blue?style=for-the-badge)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/status-production-success?style=for-the-badge)
+- Search startup records with autocomplete and fuzzy matching.
+- Enrich unknown startups using public web sources.
+- Calculate risk scores from funding, employees, company age, valuation, and funding efficiency.
+- Return risk levels, feature impacts, and recommendations.
+- Retrieve GitHub repository summaries and Google News results.
+- Compare startups by sector and funding stage.
+- Run the frontend and backend locally or with Docker Compose.
 
----
+## Technology
 
-## ✨ Features
+### Frontend
 
-### 🎯 Core Capabilities
+- Next.js App Router
+- React and TypeScript
+- Tailwind CSS
+- Radix UI
+- Framer Motion
+- Recharts
 
-- **🔍 Smart Search** - Autocomplete from 5,000+ startup database with fuzzy matching
-- **🤖 AI Enrichment** - Automatic web scraping for unknown startups (DuckDuckGo, Crunchbase, GitHub)
-- **📊 Risk Scoring** - XGBoost ML model with SHAP explanations
-- **💻 GitHub Insights** - Repository stats, language breakdown, commit activity
-- **📰 News Feed** - Latest articles from Google News RSS (no API key needed)
-- **📈 Stock Prices** - Real-time data from Yahoo Finance
-- **🔄 Comparables** - Sector/stage benchmarking against similar startups
-- **📥 Export Reports** - Download analysis as Markdown
+### Backend
 
-### 🎨 Professional UI
+- Python 3.11
+- FastAPI
+- Uvicorn
+- Pydantic
+- HTTPX
+- BeautifulSoup4
+- feedparser
 
-- **Modern Design** - Dark fintech theme with electric blue accents
-- **Smooth Animations** - Framer Motion transitions throughout
-- **Responsive** - Mobile-first design, works on all devices
-- **Accessible** - WCAG compliant components
-- **Fast** - Optimized performance with Next.js 14
+### Deployment
 
----
+- Docker
+- Docker Compose
+- Next.js standalone output
 
-## 🚀 Quick Start
+## Architecture
 
-### Prerequisites
+The Next.js frontend communicates with the FastAPI backend through the typed client in `lib/api.ts`.
 
-- **Node.js** 18+ and pnpm
-- **Python** 3.11+
-- **Docker** (optional, for containerized deployment)
+The backend exposes the API routes and coordinates the following services:
 
-### Option 1: Local Development
+- Dataset lookup and comparisons
+- Startup enrichment
+- Risk scoring
+- GitHub data retrieval
+- News retrieval
+- Stock-data responses
 
-#### Backend
+The application does not use a database. Runtime startup records are loaded from `backend/dataset/startups.json`.
+
+## Machine Learning and Risk Scoring
+
+The `POST /api/predict` endpoint returns a risk score, risk level, probability, feature impacts, feature importance, and recommendations.
+
+The current implementation uses rule-based scoring based on:
+
+- Funding
+- Employee count
+- Years since founding
+- Valuation
+- Funding per employee
+- Growth rate
+
+The current service is a demo implementation. It does not load a trained XGBoost model or calculate SHAP values. The exploratory notebook contains preprocessing and analysis work based on the raw startup-success dataset, but it is not connected to the running API.
+
+## Project Structure
+
+```text
+.
+|-- app/                         Next.js routes and global styles
+|-- components/                  React screens and UI components
+|-- hooks/                       Shared React hooks
+|-- lib/                         API client and utilities
+|-- public/                      Static assets
+|-- backend/
+|   |-- src/main.py              FastAPI application
+|   |-- src/services/            Backend services
+|   |-- dataset/startups.json    Runtime startup dataset
+|   |-- requirements.txt         Python dependencies
+|   `-- Dockerfile               Backend image definition
+|-- data/raw/                    Source data for analysis
+|-- notebooks/                   Exploratory notebooks
+|-- docker-compose.yml           Frontend and backend orchestration
+|-- Dockerfile.frontend          Frontend image definition
+|-- package.json                 Frontend scripts and dependencies
+|-- pnpm-lock.yaml               Locked frontend dependencies
+`-- README.md
+```
+
+## Getting Started
+
+### Requirements
+
+- Node.js 20 or newer
+- pnpm
+- Python 3.11 or newer
+- Docker and Docker Compose, if using containers
+
+### Run locally
+
+Start the backend in one terminal:
 
 ```bash
 cd backend
+python -m venv .venv
+```
 
-# Install dependencies
+Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies and start the API:
+
+```bash
 pip install -r requirements.txt
-
-# Copy environment file
 cp .env.example .env
-
-# Run the server
 python run.py
 ```
 
-Backend will be available at `http://localhost:8000`
-
-#### Frontend
+Start the frontend in a second terminal from the project root:
 
 ```bash
-# Install dependencies
 pnpm install
-
-# Copy environment file
 cp .env.local.example .env.local
-
-# Run development server
 pnpm dev
 ```
 
-Frontend will be available at `http://localhost:3000`
+Open the application at `http://localhost:3000`.
 
-### Option 2: Docker (Recommended for Production)
+The backend is available at `http://localhost:8000`. API documentation is available at `http://localhost:8000/api/docs`.
+
+The included `start.bat` and `start.sh` scripts can start both services.
+
+### Run with Docker
 
 ```bash
-# Build and run both services
-docker-compose up --build
-
-# Or run in detached mode
-docker-compose up -d
+docker compose up --build
 ```
 
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:8000`
-- API Docs: `http://localhost:8000/api/docs`
+The frontend runs on port 3000 and the backend runs on port 8000.
 
----
+## Environment Variables
 
-## 📁 Project Structure
+Create `.env.local` in the project root:
 
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
-riskradar/
-├── backend/                    # FastAPI Backend
-│   ├── src/
-│   │   ├── main.py            # API server (8 endpoints)
-│   │   └── services/
-│   │       ├── ml_service.py          # XGBoost + SHAP
-│   │       ├── dataset_service.py     # Dataset management
-│   │       ├── enrichment_service.py  # Web scraping
-│   │       ├── github_service.py      # GitHub API
-│   │       ├── news_service.py        # Google News
-│   │       └── stock_service.py       # Yahoo Finance
-│   ├── dataset/               # Startup database CSV
-│   ├── models/                # Trained ML models
-│   ├── requirements.txt
-│   ├── run.py
-│   └── Dockerfile
-│
-├── app/                       # Next.js App Router
-│   ├── page.tsx              # Landing page
-│   ├── layout.tsx            # Root layout
-│   └── globals.css           # Global styles
-│
-├── components/               # React Components
-│   ├── welcome-screen.tsx           # Animated landing
-│   ├── startup-search-dialog.tsx    # Smart search UI
-│   ├── dashboard/
-│   │   ├── index.tsx                # Main dashboard
-│   │   ├── dashboard-tab.tsx        # Overview tab
-│   │   ├── startups-tab.tsx         # Startups list
-│   │   ├── profile-tab.tsx          # User profile
-│   │   └── settings-tab.tsx         # Settings
-│   └── ui/                          # 57 UI components
-│
-├── lib/
-│   ├── api.ts                # Backend API client
-│   └── utils.ts              # Utility functions
-│
-├── docker-compose.yml        # Multi-container setup
-├── package.json
-└── README.md
-```
-
----
-
-## 🔌 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/health` | Health check with service status |
-| `GET` | `/api/startups/suggest` | Autocomplete suggestions |
-| `POST` | `/api/startups/lookup` | Find startup in dataset |
-| `POST` | `/api/enrich` | Web enrichment for unknown startups |
-| `POST` | `/api/predict` | XGBoost risk scoring + SHAP |
-| `GET` | `/api/github/{org}` | GitHub organization repos |
-| `GET` | `/api/news/{company}` | Latest news articles |
-| `GET` | `/api/stock/{ticker}` | Stock price data |
-| `POST` | `/api/comparables` | Find similar startups |
-
-**Full API Documentation**: http://localhost:8000/api/docs
-
----
-
-## 🎨 Tech Stack
-
-### Frontend
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS 4
-- **Animations**: Framer Motion
-- **UI Components**: Radix UI
-- **Charts**: Recharts
-- **State**: React Hooks
-
-### Backend
-- **Framework**: FastAPI
-- **Language**: Python 3.11
-- **ML**: XGBoost, SHAP, Scikit-learn
-- **Data**: Pandas, NumPy
-- **HTTP**: HTTPX (async)
-- **Scraping**: BeautifulSoup4
-- **APIs**: GitHub, Google News RSS, Yahoo Finance
-
-### DevOps
-- **Containerization**: Docker, Docker Compose
-- **Server**: Uvicorn (ASGI)
-- **Process Manager**: PM2 (optional)
-
----
-
-## 🔧 Configuration
-
-### Backend Environment Variables
 
 Create `backend/.env`:
 
 ```env
-# GitHub API Token (optional - increases rate limit from 60 to 5000 req/hr)
 GITHUB_TOKEN=your_github_token_here
-
-# Frontend URL for CORS
 FRONTEND_URL=http://localhost:3000
-
-# API Configuration
 API_HOST=0.0.0.0
 API_PORT=8000
 ```
 
-### Frontend Environment Variables
+`GITHUB_TOKEN` is optional. It increases the GitHub API rate limit. Do not commit real environment files or credentials.
 
-Create `.env.local`:
+## API Routes
 
-```env
-# Backend API URL
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
+| Method | Route | Description |
+| --- | --- | --- |
+| GET | `/api/health` | Check backend service status |
+| GET | `/api/startups/suggest` | Return startup suggestions |
+| POST | `/api/startups/lookup` | Find a startup in the dataset |
+| POST | `/api/enrich` | Enrich an unknown startup |
+| POST | `/api/predict` | Return risk scoring results |
+| GET | `/api/github/{org}` | Return GitHub organization data |
+| GET | `/api/news/{company}` | Return Google News results |
+| GET | `/api/stock/{ticker}` | Return stock-data demo results |
+| POST | `/api/comparables` | Return comparable startups and benchmarks |
 
----
+## Validation
 
-## 🧪 Testing
-
-### Backend
-
-```bash
-cd backend
-
-# Test health endpoint
-curl http://localhost:8000/api/health
-
-# Test startup lookup
-curl -X POST http://localhost:8000/api/startups/lookup \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Stripe", "fuzzy": true}'
-
-# Test GitHub API
-curl http://localhost:8000/api/github/stripe
-
-# Test news
-curl http://localhost:8000/api/news/stripe
-
-# Test stock data
-curl http://localhost:8000/api/stock/COIN
-```
-
-### Frontend
+Frontend commands:
 
 ```bash
-# Run development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
-
-# Lint code
+pnpm type-check
 pnpm lint
+pnpm build
 ```
 
----
-
-## 📊 Data Flow
-
-```
-User searches "Stripe"
-        ↓
-Frontend calls /api/startups/lookup
-        ↓
-Backend checks dataset
-        ↓
-    ┌───┴───┐
-    ↓       ↓
-  Found   Not Found
-    ↓       ↓
- Return  /api/enrich
-  Data      ↓
-         Web Scraping
-         (DuckDuckGo, Crunchbase, GitHub)
-            ↓
-         Return Enriched Data
-            ↓
-    /api/predict (XGBoost + SHAP)
-            ↓
-    /api/github/{org}
-            ↓
-    /api/news/{company}
-            ↓
-    /api/stock/{ticker}
-            ↓
-    /api/comparables
-            ↓
-    Display in 6-tab Dashboard
-```
-
----
-
-## 🚢 Deployment
-
-### Production Checklist
-
-- [ ] Set `NODE_ENV=production`
-- [ ] Configure environment variables
-- [ ] Set up GitHub token for higher rate limits
-- [ ] Enable HTTPS/SSL
-- [ ] Configure CORS properly
-- [ ] Set up monitoring (e.g., Sentry)
-- [ ] Configure logging
-- [ ] Set up backups for dataset
-- [ ] Enable rate limiting
-- [ ] Configure CDN for static assets
-
-### Deploy to Vercel (Frontend)
+Backend verification:
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
+curl http://localhost:8000/api/health
 ```
 
-### Deploy Backend (Railway/Render/Fly.io)
+## Screenshots
+
+Screenshots can be added here for:
+
+- Landing page
+- Dashboard overview
+- Startup search
+- Startup comparison
+- API documentation
+
+## Deployment
+
+The repository includes Docker configuration for a two-container deployment:
+
+- `Dockerfile.frontend` builds the Next.js application.
+- `backend/Dockerfile` builds the FastAPI service.
+- `docker-compose.yml` runs both services together.
+
+Configure the production environment variables, then run:
 
 ```bash
-# Example for Railway
-railway login
-railway init
-railway up
+docker compose up --build -d
 ```
 
----
+For hosted deployments, deploy the frontend and backend as separate services. Set `NEXT_PUBLIC_API_URL` to the public backend URL and configure `FRONTEND_URL` with the public frontend URL.
 
-## 🤝 Contributing
+## License
 
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **Radix UI** for accessible components
-- **Tailwind CSS** for utility-first styling
-- **FastAPI** for the amazing Python framework
-- **XGBoost** for ML capabilities
-- **SHAP** for explainable AI
-
----
-
-## 📧 Support
-
-For support, email support@riskradar.io or open an issue on GitHub.
-
----
-
-<div align="center">
-
-**Built with ❤️ for the startup ecosystem**
-
-[Website](https://riskradar.io) • [Documentation](https://docs.riskradar.io) • [API](https://api.riskradar.io)
-
-</div>
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
